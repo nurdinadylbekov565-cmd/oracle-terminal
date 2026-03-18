@@ -1,0 +1,15 @@
+{
+    "name": "ORACLE TERMINAL",
+    "short_name": "ORACLE",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#F80000",
+    "icons": [
+      {
+        "src": "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg",
+        "sizes": "512x512",
+        "type": "image/svg+xml"
+      }
+    ]
+  }
