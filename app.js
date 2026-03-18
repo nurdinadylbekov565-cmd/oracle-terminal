@@ -2,33 +2,28 @@ window.onload = async function () {
     const SUPABASE_URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     const input = document.getElementById('cmd-input');
     const output = document.getElementById('terminal-out');
     const chartContainer = document.getElementById('chart-container');
     const menuItems = document.querySelectorAll('nav div');
     const mobileButtons = document.querySelectorAll('.mobile-menu button');
-
     let virtualDB = [];
 
-    // Принудительная синхронизация
     async function syncData() {
-        printToConsole('> SYNCING WITH ORACLE_CLOUD...', 'text-zinc-500');
+        printToConsole('> SYNCING...', 'text-zinc-500');
         try {
             const { data, error } = await _supabase.from('oracle_expenses').select('*');
             if (error) throw error;
             virtualDB = data || [];
-            printToConsole(`> SYNC_COMPLETE: ${virtualDB.length} RECORDS.`, 'text-green-600');
-        } catch (e) {
-            printToConsole('> SYNC_ERROR: OFFLINE_MODE.', 'text-red-600');
-        }
+            printToConsole(`> SYNC_OK: ${virtualDB.length} RECORDS.`, 'text-green-600');
+        } catch (e) { printToConsole('> SYNC_ERR.', 'text-red-600'); }
     }
 
     const commands = {
-        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS, LOGS',
-        'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: CONNECTED | SEC_LEVEL: 5',
-        'SCAN': 'SCANNING... [||||||||||] 100% | ALL SYSTEMS CLEAR.',
-        'LOGS': 'USER: TONI_STARK | SESSION: 0x882A | CLOUD: OK'
+        'HELP': 'AVAILABLE: SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS',
+        'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: OK',
+        'SCAN': 'SCANNING... [||||||||||] 100% | CLEAR.',
+        'LOGS': 'USER: TONI_STARK | ACCESS: ARCHITECT'
     };
 
     function printToConsole(text, colorClass = 'text-zinc-400') {
@@ -44,20 +39,18 @@ window.onload = async function () {
         if (!fullCmd) return;
         const parts = fullCmd.split(' ');
         const cmd = parts[0].toUpperCase();
-
         printToConsole(`<span class="text-[#F80000] font-bold">SYS@ORACLE:~$</span> <span class="text-white">${fullCmd}</span>`, '');
 
         if (cmd === 'ADD') {
             const amt = parseFloat(parts[1]);
             const desc = parts.slice(2).join(' ') || 'OTHER';
             if (!isNaN(amt)) {
-                printToConsole('> COMMITTING...', 'text-yellow-600');
                 const { data, error } = await _supabase.from('oracle_expenses').insert([{ amount: amt, category: desc.toUpperCase() }]).select();
                 if (!error) { virtualDB.push(data[0]); printToConsole(`> SUCCESS: ID #${data[0].id}`, 'text-green-500'); }
-            } else { printToConsole('> ERR: ADD [AMT] [DESC]'); }
+            }
         }
         else if (cmd === 'STATS') {
-            if (virtualDB.length === 0) return printToConsole('> ERR: NO DATA.');
+            if (virtualDB.length === 0) return printToConsole('> NO DATA.');
             const summary = {};
             virtualDB.forEach(i => { 
                 const c = i.category || 'OTHER'; 
@@ -73,28 +66,19 @@ window.onload = async function () {
             printToConsole(html + '</div>');
         }
         else if (cmd === 'SHOW') {
-            if (virtualDB.length === 0) return printToConsole('> DB_EMPTY.');
-            let t = `<div class="mt-2 text-[10px] border-t border-zinc-800 pt-2">
-                <div class="flex justify-between text-red-600 font-bold"><span>ID</span><span class="flex-1 text-center">DESC</span><span>AMT</span></div>`;
+            if (virtualDB.length === 0) return printToConsole('> EMPTY.');
+            let t = `<div class="mt-2 text-[10px] border-t border-zinc-800 pt-2">`;
             virtualDB.forEach(i => {
-                t += `<div class="flex justify-between border-b border-zinc-900 py-1"><span class="text-zinc-600">#${i.id}</span><span class="flex-1 text-center truncate">${i.category}</span><span class="text-white font-bold">${i.amount}</span></div>`;
+                t += `<div class="flex justify-between border-b border-zinc-900 py-1"><span>#${i.id}</span><span class="flex-1 text-center">${i.category}</span><span>${i.amount}</span></div>`;
             });
             printToConsole(t + '</div>');
         }
         else if (cmd === 'TOTAL') {
             const sum = virtualDB.reduce((a, i) => a + (parseFloat(i.amount) || 0), 0);
-            printToConsole(`> TOTAL: <span class="text-white underline">${sum}</span>`, 'text-yellow-500');
-        }
-        else if (cmd === 'DELETE') {
-            const id = parseInt(parts[1]);
-            if (!isNaN(id)) {
-                const { error } = await _supabase.from('oracle_expenses').delete().eq('id', id);
-                if (!error) { virtualDB = virtualDB.filter(i => i.id !== id); printToConsole(`> #${id} DELETED.`, 'text-red-500'); }
-            }
+            printToConsole(`> TOTAL: ${sum}`, 'text-yellow-500');
         }
         else if (cmd === 'CLEAR') { output.innerHTML = '<div class="scanline"></div>'; }
         else if (commands[cmd]) { printToConsole(`> ${commands[cmd]}`); }
-        else { printToConsole(`> ERR: UNKNOWN COMMAND`, 'text-zinc-600'); }
     }
 
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { processCommand(input.value); input.value = ''; } });
