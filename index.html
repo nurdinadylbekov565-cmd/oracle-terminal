@@ -1,173 +1,56 @@
-window.onload = async function () {
-    const SUPABASE_URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ORACLE TERMINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0c0c0c] text-[#EBEAE8] font-mono overflow-hidden h-screen">
+    <div class="scanline"></div>
 
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const input = document.getElementById('cmd-input');
-    const output = document.getElementById('terminal-out');
-    const chartContainer = document.getElementById('chart-container');
-    const menuItems = document.querySelectorAll('nav div');
-    const mobileButtons = document.querySelectorAll('.mobile-menu button');
+    <div class="flex h-full p-4 md:p-6 gap-6 max-w-[1400px] mx-auto relative z-20">
+        <aside id="sidebar" class="hidden md:flex flex-col w-64 border-r border-zinc-900 pr-6 py-4">
+            <div class="italic text-[10px] tracking-[0.3em] text-zinc-600 mb-8 uppercase">SYSTEM_ACCESS_V1.0</div>
+            <nav class="space-y-2">
+                <div class="group"><span>▶</span> STATUS</div>
+                <div class="group"><span>▶</span> SCAN</div>
+                <div class="group"><span>▶</span> DATABASES</div>
+                <div class="group"><span>▶</span> SHOW</div>
+                <div class="group"><span>▶</span> STATS</div>
+                <div class="group"><span>▶</span> TOTAL</div>
+                <div class="group"><span>▶</span> CLEAR</div>
+            </nav>
+        </aside>
 
-    let virtualDB = [];
-    let myChart = null; // Объект для графика
+        <main class="flex-1 flex flex-col min-w-0 bg-black/40 border border-zinc-900 rounded-lg p-4 shadow-2xl">
+            <div class="mobile-menu md:hidden flex flex-wrap gap-2 mb-4 border-b border-zinc-900 pb-4">
+                <button class="bg-zinc-900 px-3 py-1 rounded text-xs">STATUS</button>
+                <button class="bg-zinc-900 px-3 py-1 rounded text-xs">SHOW</button>
+                <button class="bg-zinc-900 px-3 py-1 rounded text-xs text-red-600">STATS</button>
+                <button class="bg-zinc-900 px-3 py-1 rounded text-xs">TOTAL</button>
+            </div>
 
-    async function syncData() {
-        printToConsole('> SYNCING WITH CLOUD_DB...', 'text-zinc-500');
-        const { data, error } = await _supabase.from('oracle_expenses').select('*');
-        if (!error && data) {
-            virtualDB = data;
-            printToConsole(`> SYNC_COMPLETE: ${virtualDB.length} RECORDS LOADED.`, 'text-green-600');
-        } else {
-            printToConsole('> SYNC_ERROR: OFFLINE_MODE.', 'text-red-600');
-        }
-    }
+            <div id="terminal-out" class="flex-1 overflow-y-auto space-y-2 mb-4 pr-2 custom-scroll text-sm md:text-base">
+                <div class="text-zinc-500 italic">> STANDBY... WAITING FOR CORE_INITIALIZATION...</div>
+            </div>
 
-    const commands = {
-        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS, DATABASES',
-        'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: CONNECTED | SEC_LEVEL: 5',
-        'SCAN': 'SCANNING... [||||||||||] 100% | ALL SYSTEMS CLEAR.',
-        'DATABASES': 'ORACLE_DB_01: ONLINE | TABLE: oracle_expenses',
-        'SECURITY': 'FIREWALL: ACTIVE | ENCRYPTION: RSA-4096',
-        'LOGS': 'LAST LOGIN: TONI_STARK | SESSION_ID: 0x882A'
-    };
+            <div id="chart-container" class="hidden h-48 md:h-64 mb-4 border-t border-zinc-900 pt-4">
+                <canvas id="expensesChart"></canvas>
+            </div>
 
-    function printToConsole(text, colorClass = 'text-zinc-400') {
-        const line = document.createElement('div');
-        line.className = `${colorClass} mb-2 pl-4 border-l border-zinc-800`;
-        line.innerHTML = text;
-        output.appendChild(line);
-        output.scrollTop = output.scrollHeight;
-    }
+            <div class="flex items-center gap-3 border-t border-zinc-900 pt-4">
+                <span class="text-[#F80000] font-bold animate-pulse">SYS@ORACLE:~$</span>
+                <input id="cmd-input" type="text" autocomplete="off" autofocus
+                    class="bg-transparent border-none outline-none flex-1 text-white placeholder-zinc-800"
+                    placeholder="ENTER COMMAND...">
+            </div>
+        </main>
+    </div>
 
-    async function processCommand(rawCmd) {
-        const fullCmd = rawCmd.trim();
-        if (!fullCmd) return;
-        
-        const parts = fullCmd.split(' ');
-        const cmd = parts[0].toUpperCase();
-
-        const userLine = document.createElement('p');
-        userLine.innerHTML = `<span class="text-[#F80000] font-bold">SYS@ORACLE:~$</span> <span class="text-white">${fullCmd}</span>`;
-        output.appendChild(userLine);
-
-        if (cmd === 'ADD') {
-            const amount = parseFloat(parts[1]);
-            const description = parts.slice(2).join(' ') || 'OTHER'; 
-            
-            if (!isNaN(amount)) {
-                printToConsole('> SENDING_PACKET...', 'text-yellow-600');
-                const { data, error } = await _supabase.from('oracle_expenses').insert([
-                    { amount: amount, category: description.toUpperCase() }
-                ]).select();
-
-                if (!error) {
-                    virtualDB.push(data[0]);
-                    printToConsole(`> SUCCESS: DATA_COMMITTED [ID: ${data[0].id}]`, 'text-green-500');
-                } else {
-                    printToConsole(`> DB_ERROR: ${error.message}`, 'text-red-500');
-                }
-            } else {
-                printToConsole('> ERR: USAGE: ADD [AMT] [DESCRIPTION]');
-            }
-        } 
-        
-        else if (cmd === 'STATS') {
-            if (virtualDB.length === 0) {
-                printToConsole('> ERR: NO_DATA_FOR_ANALYSIS.', 'text-red-500');
-                return;
-            }
-
-            printToConsole('> COMPILING_VISUAL_DATA...', 'text-cyan-500');
-            chartContainer.classList.remove('hidden');
-
-            // Агрегация данных по категориям
-            const summary = {};
-            virtualDB.forEach(item => {
-                const cat = item.category || 'OTHER';
-                summary[cat] = (summary[cat] || 0) + (parseFloat(item.amount) || 0);
-            });
-
-            const ctx = document.getElementById('expensesChart').getContext('2d');
-            if (myChart) { myChart.destroy(); }
-
-            myChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(summary),
-                    datasets: [{
-                        data: Object.values(summary),
-                        backgroundColor: ['#F80000', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'],
-                        borderColor: '#000',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#71717a', font: { family: 'monospace', size: 10 } } }
-                    }
-                }
-            });
-            output.scrollTop = output.scrollHeight;
-        }
-
-        else if (cmd === 'DELETE') {
-            const idToDelete = parseInt(parts[1]);
-            if (!isNaN(idToDelete)) {
-                printToConsole(`> PURGING RECORD #${idToDelete}...`, 'text-red-500');
-                const { error } = await _supabase.from('oracle_expenses').delete().eq('id', idToDelete);
-                if (!error) {
-                    virtualDB = virtualDB.filter(i => i.id !== idToDelete);
-                    printToConsole('> SUCCESS: RECORD DELETED.', 'text-green-500');
-                }
-            }
-        }
-
-        else if (cmd === 'SHOW') {
-            chartContainer.classList.add('hidden'); // Прячем график при просмотре таблицы
-            if (virtualDB.length === 0) {
-                printToConsole('> DB_EMPTY.');
-            } else {
-                let table = `<div class="mt-2 text-[10px] text-white border-t border-zinc-800 pt-2">
-                             <div class="flex justify-between font-bold text-red-600 mb-1"><span>ID</span><span class="flex-1 px-4 text-center">DESCRIPTION</span><span>AMT</span></div>`;
-                virtualDB.forEach(item => {
-                    table += `<div class="flex justify-between border-b border-zinc-900 py-1"><span class="text-zinc-500">#${item.id}</span><span class="flex-1 px-4 text-zinc-300 uppercase truncate text-center">${item.category}</span><span class="text-white font-bold">${item.amount}</span></div>`;
-                });
-                table += `</div>`;
-                printToConsole(table);
-            }
-        }
-
-        else if (cmd === 'TOTAL') {
-            const sum = virtualDB.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0);
-            printToConsole(`> TOTAL_EXPENDITURE: <span class="text-white font-bold underline">${sum}</span>`, 'text-yellow-500');
-        }
-
-        else if (cmd === 'CLEAR') {
-            output.innerHTML = '<div class="scanline"></div>';
-            chartContainer.classList.add('hidden');
-        }
-
-        else if (commands[cmd]) {
-            printToConsole(`> ${commands[cmd]}`);
-        } 
-        
-        else {
-            printToConsole(`> ERR: UNKNOWN_COMMAND '${cmd}'`, 'text-yellow-700');
-        }
-    }
-
-    input.addEventListener('keydown', (e) => { 
-        if (e.key === 'Enter') { processCommand(input.value); input.value = ''; } 
-    });
-
-    [...menuItems, ...mobileButtons].forEach(el => {
-        el.addEventListener('click', function() {
-            processCommand(this.innerText.replace('▶', '').trim());
-        });
-    });
-
-    await syncData();
-};
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
