@@ -1,143 +1,171 @@
 window.onload = async function () {
-    const URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
-    const KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
-    const _db = supabase.createClient(URL, KEY);
+    const SUPABASE_URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
 
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const input = document.getElementById('cmd-input');
-    const out = document.getElementById('terminal-out');
+    const output = document.getElementById('terminal-out');
     const chartContainer = document.getElementById('chart-container');
-    const menuItems = document.querySelectorAll('nav div, .mobile-menu button');
-    
-    let dbData = [];
-    let myChart = null;
+    const menuItems = document.querySelectorAll('nav div');
+    const mobileButtons = document.querySelectorAll('.mobile-menu button');
 
-    // --- CORE FUNCTIONS ---
+    let virtualDB = [];
+    let myChart = null; // Объект для графика
+
     async function syncData() {
-        printLine('> INITIALIZING ORACLE_CORE_V1.0...', 'text-zinc-500');
-        try {
-            const { data, error } = await _db.from('oracle_expenses').select('*');
-            if (error) throw error;
-            dbData = data || [];
-            printLine('> AUTHENTICATION SUCCESSFUL. ACCESS GRANTED.', 'text-[#F80000] font-bold');
-            printLine(`> SYNC_COMPLETE: ${dbData.length} RECORDS RETRIEVED.`, 'text-green-600');
-        } catch (e) {
-            printLine('> CRITICAL_ERR: DATABASE_CONNECTION_FAILED.', 'text-red-600');
-            console.error(e);
+        printToConsole('> SYNCING WITH CLOUD_DB...', 'text-zinc-500');
+        const { data, error } = await _supabase.from('oracle_expenses').select('*');
+        if (!error && data) {
+            virtualDB = data;
+            printToConsole(`> SYNC_COMPLETE: ${virtualDB.length} RECORDS LOADED.`, 'text-green-600');
+        } else {
+            printToConsole('> SYNC_ERROR: OFFLINE_MODE.', 'text-red-600');
         }
     }
 
-    function printLine(text, className = 'text-zinc-400') {
+    const commands = {
+        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS, DATABASES',
+        'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: CONNECTED | SEC_LEVEL: 5',
+        'SCAN': 'SCANNING... [||||||||||] 100% | ALL SYSTEMS CLEAR.',
+        'DATABASES': 'ORACLE_DB_01: ONLINE | TABLE: oracle_expenses',
+        'SECURITY': 'FIREWALL: ACTIVE | ENCRYPTION: RSA-4096',
+        'LOGS': 'LAST LOGIN: TONI_STARK | SESSION_ID: 0x882A'
+    };
+
+    function printToConsole(text, colorClass = 'text-zinc-400') {
         const line = document.createElement('div');
-        line.className = `${className} mb-2 pl-4 border-l border-zinc-800 animate-pulse-subtle`;
+        line.className = `${colorClass} mb-2 pl-4 border-l border-zinc-800`;
         line.innerHTML = text;
-        out.appendChild(line);
-        out.scrollTop = out.scrollHeight;
+        output.appendChild(line);
+        output.scrollTop = output.scrollHeight;
     }
 
-    async function executeCommand(rawInput) {
-        const trimmed = rawInput.trim();
-        if (!trimmed) return;
-
-        const parts = trimmed.split(' ');
-        const command = parts[0].toUpperCase();
+    async function processCommand(rawCmd) {
+        const fullCmd = rawCmd.trim();
+        if (!fullCmd) return;
         
-        printLine(`<span class="text-[#F80000] font-bold">SYS@ORACLE:~$</span> <span class="text-white">${trimmed}</span>`);
+        const parts = fullCmd.split(' ');
+        const cmd = parts[0].toUpperCase();
 
-        if (command === 'ADD') {
+        const userLine = document.createElement('p');
+        userLine.innerHTML = `<span class="text-[#F80000] font-bold">SYS@ORACLE:~$</span> <span class="text-white">${fullCmd}</span>`;
+        output.appendChild(userLine);
+
+        if (cmd === 'ADD') {
             const amount = parseFloat(parts[1]);
-            const category = parts.slice(2).join(' ') || 'OTHER';
+            const description = parts.slice(2).join(' ') || 'OTHER'; 
             
-            if (isNaN(amount)) {
-                printLine('> ERR: INVALID_AMOUNT. USAGE: ADD [NUMBER] [CATEGORY]', 'text-red-500');
-                return;
-            }
+            if (!isNaN(amount)) {
+                printToConsole('> SENDING_PACKET...', 'text-yellow-600');
+                const { data, error } = await _supabase.from('oracle_expenses').insert([
+                    { amount: amount, category: description.toUpperCase() }
+                ]).select();
 
-            const { data, error } = await _db.from('oracle_expenses').insert([
-                { amount: amount, category: category.toUpperCase() }
-            ]).select();
-
-            if (!error) {
-                dbData.push(data[0]);
-                printLine(`> DATA_INJECTED: TRANSACTION_ID #${data[0].id}`, 'text-green-500');
+                if (!error) {
+                    virtualDB.push(data[0]);
+                    printToConsole(`> SUCCESS: DATA_COMMITTED [ID: ${data[0].id}]`, 'text-green-500');
+                } else {
+                    printToConsole(`> DB_ERROR: ${error.message}`, 'text-red-500');
+                }
             } else {
-                printLine('> ERR: INJECTION_FAILED.', 'text-red-500');
+                printToConsole('> ERR: USAGE: ADD [AMT] [DESCRIPTION]');
             }
-
-        } else if (command === 'STATS') {
-            if (dbData.length === 0) {
-                printLine('> ERR: NO_DATA_AVAILABLE_FOR_ANALYSIS.');
+        } 
+        
+        else if (cmd === 'STATS') {
+            if (virtualDB.length === 0) {
+                printToConsole('> ERR: NO_DATA_FOR_ANALYSIS.', 'text-red-500');
                 return;
             }
-            
+
+            printToConsole('> COMPILING_VISUAL_DATA...', 'text-cyan-500');
             chartContainer.classList.remove('hidden');
-            const totals = {};
-            dbData.forEach(item => {
+
+            // Агрегация данных по категориям
+            const summary = {};
+            virtualDB.forEach(item => {
                 const cat = item.category || 'OTHER';
-                totals[cat] = (totals[cat] || 0) + (parseFloat(item.amount) || 0);
+                summary[cat] = (summary[cat] || 0) + (parseFloat(item.amount) || 0);
             });
 
             const ctx = document.getElementById('expensesChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            
+            if (myChart) { myChart.destroy(); }
+
             myChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(totals),
+                    labels: Object.keys(summary),
                     datasets: [{
-                        data: Object.values(totals),
-                        backgroundColor: ['#F80000', '#3b82f6', '#22c55e', '#eab308', '#a855f7'],
-                        borderWidth: 0,
-                        hoverOffset: 10
+                        data: Object.values(summary),
+                        backgroundColor: ['#F80000', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'],
+                        borderColor: '#000',
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#71717a', font: { family: 'monospace', size: 10 } }
-                        }
+                        legend: { position: 'bottom', labels: { color: '#71717a', font: { family: 'monospace', size: 10 } } }
                     }
                 }
             });
-            printLine('> ANALYTICS_GENERATED_SUCCESSFULLY.', 'text-blue-400');
+            output.scrollTop = output.scrollHeight;
+        }
 
-        } else if (command === 'SHOW') {
+        else if (cmd === 'DELETE') {
+            const idToDelete = parseInt(parts[1]);
+            if (!isNaN(idToDelete)) {
+                printToConsole(`> PURGING RECORD #${idToDelete}...`, 'text-red-500');
+                const { error } = await _supabase.from('oracle_expenses').delete().eq('id', idToDelete);
+                if (!error) {
+                    virtualDB = virtualDB.filter(i => i.id !== idToDelete);
+                    printToConsole('> SUCCESS: RECORD DELETED.', 'text-green-500');
+                }
+            }
+        }
+
+        else if (cmd === 'SHOW') {
+            chartContainer.classList.add('hidden'); // Прячем график при просмотре таблицы
+            if (virtualDB.length === 0) {
+                printToConsole('> DB_EMPTY.');
+            } else {
+                let table = `<div class="mt-2 text-[10px] text-white border-t border-zinc-800 pt-2">
+                             <div class="flex justify-between font-bold text-red-600 mb-1"><span>ID</span><span class="flex-1 px-4 text-center">DESCRIPTION</span><span>AMT</span></div>`;
+                virtualDB.forEach(item => {
+                    table += `<div class="flex justify-between border-b border-zinc-900 py-1"><span class="text-zinc-500">#${item.id}</span><span class="flex-1 px-4 text-zinc-300 uppercase truncate text-center">${item.category}</span><span class="text-white font-bold">${item.amount}</span></div>`;
+                });
+                table += `</div>`;
+                printToConsole(table);
+            }
+        }
+
+        else if (cmd === 'TOTAL') {
+            const sum = virtualDB.reduce((acc, item) => acc + (parseFloat(item.amount) || 0), 0);
+            printToConsole(`> TOTAL_EXPENDITURE: <span class="text-white font-bold underline">${sum}</span>`, 'text-yellow-500');
+        }
+
+        else if (cmd === 'CLEAR') {
+            output.innerHTML = '<div class="scanline"></div>';
             chartContainer.classList.add('hidden');
-            let tableHtml = '<div class="mt-2 border-t border-zinc-800 pt-2 font-mono text-xs">';
-            dbData.slice(-10).forEach(item => {
-                tableHtml += `
-                    <div class="flex justify-between py-1 border-b border-zinc-900">
-                        <span class="text-zinc-600">#${item.id}</span>
-                        <span class="text-zinc-300">${item.category}</span>
-                        <span class="text-white font-bold">${item.amount}</span>
-                    </div>`;
-            });
-            printLine(tableHtml + '</div>');
+        }
 
-        } else if (command === 'TOTAL') {
-            const sum = dbData.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
-            printLine(`> TOTAL_EXPENDITURE: <span class="text-yellow-500 font-bold">${sum.toFixed(2)}</span>`, 'text-zinc-300');
-
-        } else if (command === 'CLEAR') {
-            out.innerHTML = '<div class="scanline"></div>';
-            chartContainer.classList.add('hidden');
+        else if (commands[cmd]) {
+            printToConsole(`> ${commands[cmd]}`);
+        } 
+        
+        else {
+            printToConsole(`> ERR: UNKNOWN_COMMAND '${cmd}'`, 'text-yellow-700');
         }
     }
 
-    // --- EVENTS ---
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            executeCommand(input.value);
-            input.value = '';
-        }
+    input.addEventListener('keydown', (e) => { 
+        if (e.key === 'Enter') { processCommand(input.value); input.value = ''; } 
     });
 
-    menuItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const cmdText = this.innerText.replace('▶', '').trim();
-            executeCommand(cmdText);
+    [...menuItems, ...mobileButtons].forEach(el => {
+        el.addEventListener('click', function() {
+            processCommand(this.innerText.replace('▶', '').trim());
         });
     });
 

@@ -3,54 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ORACLE TERMINAL</title>
+    <title>ORACLE DATA CONTROL</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#0c0c0c] text-[#EBEAE8] font-mono overflow-hidden h-screen">
-    <div class="scanline"></div>
+<body class="h-screen flex flex-col overflow-hidden bg-[#0c0c0c]">
+    
+    <header class="h-14 bg-[#1a1918] border-b border-[#3A3530] flex items-center justify-between px-4 md:px-8 z-50">
+        <div class="flex items-center gap-4 md:gap-6">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="ORACLE" class="h-4 md:h-5 w-auto">
+            <span class="text-[9px] md:text-[10px] text-[#706962] mono uppercase tracking-[0.2em] md:tracking-[0.4em] border-l border-[#3A3530] pl-4 md:pl-6 ml-2">Data Terminal</span>
+        </div>
+        <div class="hidden md:block text-[10px] mono text-zinc-500 italic uppercase">SYSTEM_ACTIVE // TONI_STARK</div>
+    </header>
 
-    <div class="flex h-full p-4 md:p-6 gap-6 max-w-[1400px] mx-auto relative z-20">
-        <aside id="sidebar" class="hidden md:flex flex-col w-64 border-r border-zinc-900 pr-6 py-4">
-            <div class="italic text-[10px] tracking-[0.3em] text-zinc-600 mb-8 uppercase">SYSTEM_ACCESS_V1.0</div>
-            <nav class="space-y-2">
-                <div class="group"><span>▶</span> STATUS</div>
-                <div class="group"><span>▶</span> SCAN</div>
-                <div class="group"><span>▶</span> DATABASES</div>
-                <div class="group"><span>▶</span> SHOW</div>
-                <div class="group"><span>▶</span> STATS</div>
-                <div class="group"><span>▶</span> TOTAL</div>
-                <div class="group"><span>▶</span> CLEAR</div>
+    <div class="flex flex-1 overflow-hidden">
+        <aside id="sidebar" class="w-64 bg-[#111110] border-r border-[#3A3530] p-6 hidden md:block">
+            <div class="text-[11px] text-[#706962] uppercase mb-8 tracking-tighter italic">Main_Menu</div>
+            <nav class="space-y-4 text-xs uppercase text-zinc-400">
+                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Databases</div>
+                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Security</div>
+                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Logs</div>
+                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Stats</div>
             </nav>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-black/40 border border-zinc-900 rounded-lg p-4 shadow-2xl">
-            <div class="mobile-menu md:hidden flex flex-wrap gap-2 mb-4 border-b border-zinc-900 pb-4">
-                <button class="bg-zinc-900 px-3 py-1 rounded text-xs">STATUS</button>
-                <button class="bg-zinc-900 px-3 py-1 rounded text-xs">SHOW</button>
-                <button class="bg-zinc-900 px-3 py-1 rounded text-xs text-red-600">STATS</button>
-                <button class="bg-zinc-900 px-3 py-1 rounded text-xs">TOTAL</button>
+        <main class="flex-1 p-4 md:p-8 flex flex-col gap-4">
+            <div class="mobile-menu flex md:hidden justify-between gap-2 overflow-x-auto pb-2">
+                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Status</button>
+                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Stats</button>
+                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Clear</button>
             </div>
 
-            <div id="terminal-out" class="flex-1 overflow-y-auto space-y-2 mb-4 pr-2 custom-scroll text-sm md:text-base">
-                <div class="text-zinc-500 italic">> STANDBY... WAITING FOR CORE_INITIALIZATION...</div>
-            </div>
+            <div id="terminal-out" class="flex-1 bg-black border border-[#3A3530] p-4 md:p-6 mono text-[12px] md:text-[13px] text-white overflow-y-auto relative shadow-inner">
+                <div class="scanline"></div>
+                <p class="text-zinc-600 mb-4 tracking-widest text-[9px] md:text-[10px]">>>> INITIALIZING ORACLE_CORE...</p>
+                
+                <div id="chart-container" class="mb-6 bg-[#0a0a0a] border border-zinc-900 p-2 hidden">
+                    <canvas id="expensesChart"></canvas>
+                </div>
 
-            <div id="chart-container" class="hidden h-48 md:h-64 mb-4 border-t border-zinc-900 pt-4">
-                <canvas id="expensesChart"></canvas>
+                <p class="text-red-600 font-bold">> AUTHENTICATION SUCCESSFUL.</p>
+                <p class="text-zinc-400">> СИСТЕМА ГОТОВА К РАБОТЕ.</p>
             </div>
-
-            <div class="flex items-center gap-3 border-t border-zinc-900 pt-4">
-                <span class="text-[#F80000] font-bold animate-pulse">SYS@ORACLE:~$</span>
-                <input id="cmd-input" type="text" autocomplete="off" autofocus
-                    class="bg-transparent border-none outline-none flex-1 text-white placeholder-zinc-800"
-                    placeholder="ENTER COMMAND...">
+            
+            <div class="h-14 bg-black border border-[#3A3530] flex items-center px-4 md:px-6 gap-3 md:gap-4 border-t-2 border-red-600 shadow-lg">
+                <span class="text-red-600 font-bold mono text-sm md:text-base">SYS:~$</span>
+                <input type="text" id="cmd-input" class="bg-transparent outline-none flex-1 text-white mono text-[13px] uppercase placeholder:text-zinc-800" placeholder="ENTER_COMMAND..." autofocus>
             </div>
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
