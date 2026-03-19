@@ -23,7 +23,7 @@ window.onload = async function () {
     }
 
     const commands = {
-        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS, TOP, DATABASES',
+        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], FIND [KEY], TOTAL, STATS, TOP, DATABASES',
         'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: CONNECTED | SEC_LEVEL: 5',
         'SCAN': 'SCANNING... [||||||||||] 100% | ALL SYSTEMS CLEAR.',
         'DATABASES': 'ORACLE_DB_01: ONLINE | TABLE: oracle_expenses',
@@ -55,13 +55,32 @@ window.onload = async function () {
             const description = parts.slice(2).join(' ') || 'OTHER'; 
             if (!isNaN(amount)) {
                 printToConsole('> SENDING_PACKET...', 'text-yellow-600');
-                const { data, error } = await _supabase.from('oracle_expenses').insert([{ amount, category: description.toUpperCase() }]).select();
+                const timestamp = new Date().toLocaleString('ru-RU');
+                const { data, error } = await _supabase.from('oracle_expenses').insert([{ 
+                    amount, 
+                    category: description.toUpperCase() 
+                }]).select();
+                
                 if (!error) {
                     virtualDB.push(data[0]);
                     printToConsole(`> SUCCESS: DATA_COMMITTED [ID: ${data[0].id}]`, 'text-green-500');
+                    printToConsole(`> TIMESTAMP: ${timestamp}`, 'text-zinc-600 text-[10px]');
                 }
             } else { printToConsole('> ERR: USAGE: ADD [AMT] [DESC]'); }
         } 
+        else if (cmd === 'FIND') {
+            const query = parts.slice(1).join(' ').toUpperCase();
+            if (!query) return printToConsole('> ERR: USAGE: FIND [KEYWORD]');
+            
+            const results = virtualDB.filter(i => i.category.includes(query));
+            printToConsole(`> SEARCHING_DATABASE: "${query}"...`, 'text-blue-400');
+            
+            if (results.length > 0) {
+                results.forEach(i => printToConsole(`[#${i.id}] ${i.category} — <span class="text-white">${i.amount}</span>`));
+                const subtotal = results.reduce((a, b) => a + (parseFloat(b.amount) || 0), 0);
+                printToConsole(`> SUB_TOTAL: <span class="text-yellow-500">${subtotal.toFixed(2)}</span>`);
+            } else { printToConsole('> NO_MATCHES_FOUND.', 'text-red-400'); }
+        }
         else if (cmd === 'STATS') {
             if (virtualDB.length === 0) return printToConsole('> ERR: NO_DATA.', 'text-red-500');
             chartContainer.classList.remove('hidden');
