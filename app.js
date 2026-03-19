@@ -23,7 +23,7 @@ window.onload = async function () {
     }
 
     const commands = {
-        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS, DATABASES, SECURITY, LOGS',
+        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], TOTAL, STATS, TOP, DATABASES',
         'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: CONNECTED | SEC_LEVEL: 5',
         'SCAN': 'SCANNING... [||||||||||] 100% | ALL SYSTEMS CLEAR.',
         'DATABASES': 'ORACLE_DB_01: ONLINE | TABLE: oracle_expenses',
@@ -66,10 +66,8 @@ window.onload = async function () {
             if (virtualDB.length === 0) return printToConsole('> ERR: NO_DATA.', 'text-red-500');
             chartContainer.classList.remove('hidden');
             if (myChart) myChart.destroy();
-
             const summary = {};
             virtualDB.forEach(i => { const c = i.category || 'OTHER'; summary[c] = (summary[c] || 0) + (parseFloat(i.amount) || 0); });
-
             setTimeout(() => {
                 const ctx = document.getElementById('expensesChart').getContext('2d');
                 myChart = new Chart(ctx, {
@@ -86,6 +84,14 @@ window.onload = async function () {
                 });
                 printToConsole('> ANALYTICS_READY.', 'text-cyan-500');
             }, 50);
+        }
+        else if (cmd === 'TOP') {
+            if (virtualDB.length === 0) return printToConsole('> ERR: NO_DATA.', 'text-red-500');
+            const topTakers = [...virtualDB].sort((a, b) => b.amount - a.amount).slice(0, 3);
+            printToConsole('> ANALYZING_MAJOR_EXPENSES...', 'text-orange-500');
+            topTakers.forEach((item, index) => {
+                printToConsole(`${index + 1}. ${item.category}: <span class="text-white font-bold">${item.amount}</span> [#${item.id}]`);
+            });
         }
         else if (cmd === 'SHOW') {
             chartContainer.classList.add('hidden');
