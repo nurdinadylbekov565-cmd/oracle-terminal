@@ -6,139 +6,110 @@ window.onload = async function () {
     const input = document.getElementById('cmd-input');
     const output = document.getElementById('terminal-out');
     const chartContainer = document.getElementById('chart-container');
-    const menuItems = document.querySelectorAll('nav div, .mobile-menu button');
 
     let virtualDB = [];
     let myChart = null;
 
-    async function syncData() {
-        printToConsole('> SYNCING WITH CLOUD_DB...', 'text-zinc-500 italic');
-        const { data, error } = await _supabase.from('oracle_expenses').select('*');
-        if (!error && data) {
-            virtualDB = data;
-            printToConsole(`> SYNC_COMPLETE: ${virtualDB.length} RECORDS LOADED.`, 'text-green-600');
-        } else {
-            printToConsole('> SYNC_ERROR: OFFLINE_MODE.', 'text-red-600');
-        }
+    // Авто-детект устройства
+    if (/Android|iPhone/i.test(navigator.userAgent)) {
+        document.body.classList.add('theme-rb26');
     }
 
     const commands = {
-        'HELP': 'AVAILABLE: HELP, SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], FIND [KEY], TOTAL, STATS, TOP, DATABASES',
-        'STATUS': 'SYSTEM: OPERATIONAL | CLOUD: CONNECTED | SEC_LEVEL: 5',
-        'SCAN': 'SCANNING... [||||||||||] 100% | ALL SYSTEMS CLEAR.',
-        'DATABASES': 'ORACLE_DB_01: ONLINE | TABLE: oracle_expenses',
-        'SECURITY': 'FIREWALL: ACTIVE | ENCRYPTION: RSA-4096',
-        'LOGS': 'LAST LOGIN: TONI_STARK | SESSION_ID: 0x882A'
+        'HELP': 'AVAILABLE: SCAN, STATUS, CLEAR, SHOW, ADD [AMT] [DESC], DELETE [ID], FIND [KEY], TOTAL, STATS, FORECAST, THEME',
+        'STATUS': 'SYSTEM_ONLINE | DATABASE_CONNECTED | ENCRYPTION_ACTIVE',
     };
 
-    function printToConsole(text, colorClass = 'text-zinc-400') {
-        const line = document.createElement('div');
-        line.className = `${colorClass} mb-2 pl-4 border-l border-zinc-800`;
-        line.innerHTML = text;
-        output.appendChild(line);
+    function printToConsole(text, className = '') {
+        const p = document.createElement('p');
+        p.className = `mb-1 ${className}`;
+        p.innerHTML = text;
+        output.appendChild(p);
         output.scrollTop = output.scrollHeight;
     }
 
-    async function processCommand(rawCmd) {
-        const fullCmd = rawCmd.trim();
-        if (!fullCmd) return;
-        
-        const parts = fullCmd.split(' ');
-        const cmd = parts[0].toUpperCase();
-
-        const userLine = document.createElement('p');
-        userLine.innerHTML = `<span class="text-[#F80000] font-bold">SYS@ORACLE:~$</span> <span class="text-white">${fullCmd}</span>`;
-        output.appendChild(userLine);
-
-        if (cmd === 'ADD') {
-            const amount = parseFloat(parts[1]);
-            const description = parts.slice(2).join(' ') || 'OTHER'; 
-            if (!isNaN(amount)) {
-                printToConsole('> SENDING_PACKET...', 'text-yellow-600');
-                const timestamp = new Date().toLocaleString('ru-RU');
-                const { data, error } = await _supabase.from('oracle_expenses').insert([{ amount, category: description.toUpperCase() }]).select();
-                if (!error) {
-                    virtualDB.push(data[0]);
-                    printToConsole(`> SUCCESS: DATA_COMMITTED [ID: ${data[0].id}]`, 'text-green-500');
-                    printToConsole(`> TIMESTAMP: ${timestamp}`, 'text-zinc-600 text-[10px]');
-                }
-            } else { printToConsole('> ERR: USAGE: ADD [AMT] [DESC]'); }
-        } 
-        else if (cmd === 'DELETE') {
-            const id = parts[1];
-            if (!id) return printToConsole('> ERR: USAGE: DELETE [ID]');
-            printToConsole('> DELETING_RECORD...', 'text-red-600');
-            const { error } = await _supabase.from('oracle_expenses').delete().eq('id', id);
-            if (!error) {
-                virtualDB = virtualDB.filter(i => i.id != id);
-                printToConsole(`> SUCCESS: RECORD #${id} WIPED.`, 'text-green-500');
-            } else { printToConsole('> ERR: DELETE_FAILED.'); }
+    async function syncData() {
+        const { data, error } = await _supabase.from('oracle_expenses').select('*');
+        if (!error && data) {
+            virtualDB = data;
         }
-        else if (cmd === 'FIND') {
-            const query = parts.slice(1).join(' ').toUpperCase();
-            if (!query) return printToConsole('> ERR: USAGE: FIND [KEYWORD]');
-            const results = virtualDB.filter(i => i.category.includes(query));
-            printToConsole(`> SEARCHING: "${query}"...`, 'text-blue-400');
-            if (results.length > 0) {
-                results.forEach(i => printToConsole(`[#${i.id}] ${i.category} — ${i.amount}`));
-                const subtotal = results.reduce((a, b) => a + (parseFloat(b.amount) || 0), 0);
-                printToConsole(`> SUB_TOTAL: ${subtotal.toFixed(2)}`, 'text-yellow-500');
-            } else { printToConsole('> NO_MATCHES.'); }
-        }
-        else if (cmd === 'STATS') {
-            if (virtualDB.length === 0) return printToConsole('> ERR: NO_DATA.', 'text-red-500');
-            chartContainer.classList.remove('hidden');
-            if (myChart) myChart.destroy();
-            const summary = {};
-            virtualDB.forEach(i => { const c = i.category || 'OTHER'; summary[c] = (summary[c] || 0) + (parseFloat(i.amount) || 0); });
-            setTimeout(() => {
-                const ctx = document.getElementById('expensesChart').getContext('2d');
-                myChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(summary),
-                        datasets: [{
-                            data: Object.values(summary),
-                            backgroundColor: ['#F80000', '#3b82f6', '#22c55e', '#eab308', '#a855f7'],
-                            borderColor: '#000', borderWidth: 2
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#71717a', font: { size: 10 } } } } }
-                });
-                printToConsole('> ANALYTICS_READY.', 'text-cyan-500');
-            }, 50);
-        }
-        else if (cmd === 'TOP') {
-            if (virtualDB.length === 0) return printToConsole('> ERR: NO_DATA.', 'text-red-500');
-            const topTakers = [...virtualDB].sort((a, b) => b.amount - a.amount).slice(0, 3);
-            printToConsole('> MAJOR_EXPENSES:', 'text-orange-500');
-            topTakers.forEach((item, index) => printToConsole(`${index + 1}. ${item.category}: ${item.amount} [#${item.id}]`));
-        }
-        else if (cmd === 'SHOW') {
-            chartContainer.classList.add('hidden');
-            let table = `<div class="mt-2 text-[10px] border-t border-zinc-800 pt-2">`;
-            virtualDB.slice(-10).forEach(i => {
-                table += `<div class="flex justify-between border-b border-zinc-900 py-1">
-                    <span class="text-zinc-500">#${i.id}</span>
-                    <span class="flex-1 px-4 text-center text-zinc-300 uppercase truncate">${i.category}</span>
-                    <span class="text-white font-bold">${i.amount}</span>
-                </div>`;
-            });
-            printToConsole(table + '</div>');
-        }
-        else if (cmd === 'TOTAL') {
-            const sum = virtualDB.reduce((a, b) => a + (parseFloat(b.amount) || 0), 0);
-            printToConsole(`> TOTAL_SUM: <span class="text-white font-bold underline">${sum.toFixed(2)}</span>`, 'text-yellow-500');
-        }
-        else if (cmd === 'CLEAR') {
-            output.innerHTML = '<div class="scanline"></div>';
-            chartContainer.classList.add('hidden');
-        }
-        else if (commands[cmd]) { printToConsole(`> ${commands[cmd]}`); }
-        else { printToConsole(`> ERR: UNKNOWN_COMMAND '${cmd}'`, 'text-yellow-700'); }
     }
 
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { processCommand(input.value); input.value = ''; } });
-    menuItems.forEach(el => el.addEventListener('click', function() { processCommand(this.innerText.replace('▶', '').trim()); }));
     await syncData();
+
+    input.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+            const rawVal = input.value.trim();
+            const args = rawVal.split(' ');
+            const cmd = args[0].toUpperCase();
+            input.value = '';
+
+            if (cmd === 'ADD') {
+                const amount = parseFloat(args[1]);
+                const category = args.slice(2).join(' ') || 'MISC';
+                const { error } = await _supabase.from('oracle_expenses').insert([{ amount, category }]);
+                if (!error) {
+                    await syncData();
+                    printToConsole(`> TRANSACTION_RECORDED: +${amount} [${category}]`, 'text-green-500');
+                }
+            } 
+            else if (cmd === 'THEME') {
+                if (document.body.classList.contains('theme-rb26')) {
+                    document.body.classList.replace('theme-rb26', 'theme-corp');
+                } else if (document.body.classList.contains('theme-corp')) {
+                    document.body.classList.remove('theme-corp');
+                } else {
+                    document.body.classList.add('theme-rb26');
+                }
+                printToConsole('> UI_LIVERY_UPDATED');
+            }
+            else if (cmd === 'FORECAST') {
+                if (virtualDB.length < 2) return printToConsole('> ERR: DATA_INSUFFICIENT', 'text-red-800');
+                const sorted = [...virtualDB].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+                const days = Math.max(1, Math.ceil((new Date() - new Date(sorted[0].created_at)) / 86400000));
+                const total = virtualDB.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+                const avg = total / days;
+                printToConsole(`> DATA_POINTS: ${virtualDB.length} | DAYS_TRACKED: ${days}`);
+                printToConsole(`> AVG_DAILY_BURN: ${avg.toFixed(2)}`);
+                printToConsole(`> MONTHLY_PROJECTION: <span class="text-red-600 font-bold underline">${(avg * 30).toFixed(2)}</span>`);
+            }
+            else if (cmd === 'SCAN' || cmd === 'SHOW') {
+                chartContainer.classList.add('hidden');
+                let table = `<div class="mt-2 text-[10px] border-t border-zinc-800 pt-2">`;
+                virtualDB.slice(-15).forEach(i => {
+                    table += `<div class="flex justify-between border-b border-zinc-900 py-1">
+                        <span class="text-zinc-500">#${i.id}</span>
+                        <span class="flex-1 px-4 text-zinc-300 uppercase truncate font-bold">${i.category}</span>
+                        <span class="text-white font-bold">${i.amount}</span>
+                    </div>`;
+                });
+                printToConsole(table + '</div>');
+            }
+            else if (cmd === 'FIND') {
+                const key = args[1]?.toUpperCase();
+                const found = virtualDB.filter(i => i.category.toUpperCase().includes(key));
+                printToConsole(`> SEARCHING: '${key}' | FOUND: ${found.length}`);
+                found.forEach(r => printToConsole(`>> ID:${r.id} | ${r.amount} | ${r.category}`));
+            }
+            else if (cmd === 'DELETE') {
+                const id = args[1];
+                const { error } = await _supabase.from('oracle_expenses').delete().eq('id', id);
+                if (!error) { await syncData(); printToConsole(`> RECORD #${id} REMOVED.`, 'text-red-600'); }
+            }
+            else if (cmd === 'TOTAL') {
+                const sum = virtualDB.reduce((a, b) => a + (parseFloat(b.amount) || 0), 0);
+                printToConsole(`> TOTAL_EXPENDITURE: <span class="text-white font-bold underline">${sum.toFixed(2)}</span>`, 'text-yellow-500');
+            }
+            else if (cmd === 'CLEAR') {
+                output.innerHTML = '<div class="scanline"></div>';
+                chartContainer.classList.add('hidden');
+            }
+            else if (commands[cmd]) {
+                printToConsole(`> ${commands[cmd]}`);
+            }
+            else {
+                printToConsole(`> ERR: UNKNOWN_COMMAND '${cmd}'`, 'text-red-900');
+            }
+        }
+    });
 };

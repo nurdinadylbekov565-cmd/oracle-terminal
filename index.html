@@ -4,47 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ORACLE DATA CONTROL</title>
-    
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="h-screen flex flex-col overflow-hidden bg-[#0c0c0c]">
-    
-    <header class="h-14 bg-[#1a1918] border-b border-[#3A3530] flex items-center justify-between px-4 md:px-8 z-50">
+    <div id="splash" class="fixed inset-0 z-[100] flex items-center justify-center transition-opacity duration-500 bg-inherit">
+        <div class="text-6xl font-black italic tracking-tighter splash-logo-text">O</div>
+    </div>
+
+    <header class="h-14 bg-[#1a1918] border-b border-[#3A3530] flex items-center justify-between px-4 md:px-8 z-50 theme-header">
         <div class="flex items-center gap-4 md:gap-6">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="ORACLE" class="h-4 md:h-5 w-auto">
-            <span class="text-[9px] md:text-[10px] text-[#706962] mono uppercase tracking-[0.2em] md:tracking-[0.4em] border-l border-[#3A3530] pl-4 md:pl-6 ml-2">Data Terminal</span>
+            <div class="oracle-logo">ORACLE</div>
+            <span class="text-zinc-500 text-[10px] tracking-[0.3em] font-bold hidden md:block uppercase">Financial_Terminal_v2.0</span>
         </div>
-        <div class="hidden md:block text-[10px] mono text-zinc-500 italic uppercase">SYSTEM_ACTIVE // TONI_STARK</div>
+        <div class="flex gap-2 mobile-menu">
+            <button onclick="runCmd('STATS')" class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase hover:text-white transition-colors">Stats</button>
+            <button onclick="runCmd('CLEAR')" class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase hover:text-white transition-colors">Clear</button>
+        </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
-        <aside id="sidebar" class="w-64 bg-[#111110] border-r border-[#3A3530] p-6 hidden md:block">
-            <div class="text-[11px] text-[#706962] uppercase mb-8 tracking-tighter italic">Main_Menu</div>
-            <nav class="space-y-4 text-xs uppercase text-zinc-400">
-                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Databases</div>
-                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Security</div>
-                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Logs</div>
-                <div class="hover:text-white cursor-pointer flex items-center gap-2"><span>▶</span> Stats</div>
-            </nav>
-        </aside>
-
-        <main class="flex-1 p-4 md:p-8 flex flex-col gap-4">
-            <div class="mobile-menu flex md:hidden justify-between gap-2 overflow-x-auto pb-2">
-                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Status</button>
-                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Stats</button>
-                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Clear</button>
-            </div>
-
+    <main class="flex-1 flex overflow-hidden relative">
+        <div class="flex-1 flex flex-col p-2 md:p-6 overflow-hidden">
             <div id="terminal-out" class="flex-1 bg-black border border-[#3A3530] p-4 md:p-6 mono text-[12px] md:text-[13px] text-white overflow-y-auto relative shadow-inner">
                 <div class="scanline"></div>
                 <p class="text-zinc-600 mb-4 tracking-widest text-[9px] md:text-[10px]">>>> INITIALIZING ORACLE_CORE...</p>
@@ -57,13 +43,29 @@
                 <p class="text-zinc-400">> СИСТЕМА ГОТОВА К РАБОТЕ.</p>
             </div>
             
-            <div class="h-14 bg-black border border-[#3A3530] flex items-center px-4 md:px-6 gap-3 md:gap-4 border-t-2 border-red-600 shadow-lg">
-                <span class="text-red-600 font-bold mono text-sm md:text-base">SYS:~$</span>
-                <input type="text" id="cmd-input" class="bg-transparent outline-none flex-1 text-white mono text-[13px] uppercase placeholder:text-zinc-800" placeholder="ENTER_COMMAND..." autofocus>
+            <div class="h-14 bg-black border border-[#3A3530] flex items-center px-4 md:px-6 gap-3 md:gap-4 border-t-2 border-red-600 shadow-lg input-area">
+                <span class="text-red-600 font-bold">></span>
+                <input type="text" id="cmd-input" class="flex-1 bg-transparent border-none outline-none text-white uppercase font-bold tracking-wider placeholder-zinc-800" placeholder="WAITING FOR COMMAND..." autofocus autocomplete="off">
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script src="app.js"></script>
+    <script>
+        // Функция для кнопок в шапке
+        function runCmd(cmd) {
+            const input = document.getElementById('cmd-input');
+            input.value = cmd;
+            input.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Enter'}));
+        }
+        // Управление заставкой
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const s = document.getElementById('splash');
+                s.style.opacity = '0';
+                setTimeout(() => s.style.display = 'none', 500);
+            }, 1200);
+        });
+    </script>
 </body>
 </html>
