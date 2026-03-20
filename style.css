@@ -1,77 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap');
-
-:root {
-    --oracle-red: #F80000;
-    --bg: #0c0c0c;
-    --text: #EBEAE8;
-    --border: #3A3530;
-    --header-bg: #1a1918;
-}
-
-/* Red Bull Ford 2026 Livery (Mobile Only/Manual) */
-body.theme-rb26 {
-    --bg: #000B14;
-    --text: #ffffff;
-    --border: #0033A0;
-    --header-bg: #001529;
-}
-
-/* Corporate Oracle (Light) */
-body.theme-corp {
-    --bg: #ffffff;
-    --text: #000000;
-    --border: #E2E8F0;
-    --header-bg: #f8f9fa;
-}
-
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
+:root { --oracle-red: #F80000; --bg: #0c0c0c; --text: #EBEAE8; --border: #3A3530; }
+body.theme-rb26 { --bg: #000B14; --border: #0033A0; --text: #ffffff; }
 body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    margin: 0;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Твоя сетка */
-    background-image: radial-gradient(var(--border) 0.5px, transparent 0.5px);
-    background-size: 30px 30px;
+    background-color: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace;
+    background-image: radial-gradient(var(--border) 0.5px, transparent 0.5px); background-size: 30px 30px;
+    transition: all 0.3s ease; margin: 0;
 }
-
-.oracle-logo {
-    background: var(--oracle-red);
-    color: white;
-    font-weight: 900;
-    font-style: italic;
-    padding: 2px 10px;
-    font-size: 14px;
-    letter-spacing: -0.5px;
-}
-
-.theme-header {
-    background: var(--header-bg);
-    border-color: var(--border);
-}
-
-#terminal-out {
-    background: rgba(0,0,0,0.3) !important;
-    border-color: var(--border) !important;
-    color: var(--text);
-}
-
-.input-area {
-    background: var(--bg);
-    border-color: var(--border);
-}
-
-#splash { background: var(--bg); }
-.splash-logo-text { color: var(--oracle-red); font-style: italic; }
-body.theme-rb26 .splash-logo-text { color: #ffffff; }
-
-.scanline {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
-    background-size: 100% 4px;
-    pointer-events: none;
-}
-
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: var(--border); }
+#terminal-out { background: rgba(0,0,0,0.5); border: 1px solid var(--border); height: 80vh; overflow-y: auto; position: relative; }
+.scanline { position: absolute; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; pointer-events: none; }
+.oracle-logo { background: var(--oracle-red); color: white; font-weight: 900; font-style: italic; padding: 2px 8px; }
+input { background: transparent; border: none; color: white; outline: none; width: 100%; font-weight: bold; }
