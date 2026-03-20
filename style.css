@@ -8,5 +8,5 @@ body {
 }
 #terminal-out { background: rgba(0,0,0,0.5); border: 1px solid var(--border); height: 80vh; overflow-y: auto; position: relative; }
 .scanline { position: absolute; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; pointer-events: none; }
-.oracle-logo { background: var(--oracle-red); color: white; font-weight: 900; font-style: italic; padding: 2px 8px; }
-input { background: transparent; border: none; color: white; outline: none; width: 100%; font-weight: bold; }
+.oracle-logo { background: var(--oracle-red); color: white; font-weight: 900; font-style: italic; padding: 2px 8px; text-transform: uppercase; }
+input { background: transparent; border: none; color: white; outline: none; width: 100%; font-weight: bold; font-family: 'JetBrains Mono', monospace; }

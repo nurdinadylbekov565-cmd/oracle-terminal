@@ -1,17 +1,12 @@
 window.onload = async function () {
     const SUPABASE_URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
-
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const input = document.getElementById('cmd-input');
     const output = document.getElementById('terminal-out');
-    const chartContainer = document.getElementById('chart-container');
-
     let virtualDB = [];
 
-    if (/Android|iPhone/i.test(navigator.userAgent)) {
-        document.body.classList.add('theme-rb26');
-    }
+    if (/Android|iPhone/i.test(navigator.userAgent)) { document.body.classList.add('theme-rb26'); }
 
     function printToConsole(text, className = '') {
         const p = document.createElement('p');
@@ -65,7 +60,7 @@ window.onload = async function () {
                 printToConsole(`> TOTAL: ${sum.toFixed(2)}`, 'text-yellow-500');
             }
             else if (cmd === 'CLEAR') { output.innerHTML = '<div class="scanline"></div>'; }
-            else if (cmd === 'HELP') { printToConsole('> ADD, SHOW, TOTAL, FIND, DELETE, STATS, FORECAST, THEME, CLEAR'); }
+            else if (cmd === 'HELP') { printToConsole('> ADD, SHOW, TOTAL, FORECAST, THEME, CLEAR'); }
         }
     });
 };
