@@ -6,11 +6,11 @@ window.onload = async function () {
     const input = document.getElementById('cmd-input');
     const output = document.getElementById('terminal-out');
     const chartContainer = document.getElementById('chart-container');
-    const menuItems = document.querySelectorAll('nav div, .mobile-menu button');
 
     let virtualDB = [];
     let myChart = null;
 
+    // Detect mobile for RB26 theme
     if (/Android|iPhone/i.test(navigator.userAgent)) {
         document.body.classList.add('theme-rb26');
     }
@@ -53,10 +53,10 @@ window.onload = async function () {
         } 
         else if (cmd === 'THEME') {
             document.body.classList.toggle('theme-rb26');
-            printToConsole('> LIVERY_CHANGED');
+            printToConsole('> UI_THEME_TOGGLED');
         }
         else if (cmd === 'FORECAST') {
-            if (virtualDB.length < 2) return printToConsole('> ERR: NO_DATA');
+            if (virtualDB.length < 2) return printToConsole('> ERR: INSUFFICIENT_DATA');
             const sorted = [...virtualDB].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
             const days = Math.max(1, Math.ceil((new Date() - new Date(sorted[0].created_at)) / 86400000));
             const total = virtualDB.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
@@ -68,11 +68,12 @@ window.onload = async function () {
             printToConsole(`> TOTAL: ${sum.toFixed(2)}`, 'text-yellow-500');
         }
         else if (cmd === 'SHOW') {
+            chartContainer.classList.add('hidden');
             let table = `<div class="mt-2 border-t border-zinc-800 pt-2">`;
             virtualDB.slice(-10).forEach(i => { table += `<div class="flex justify-between py-1 text-[10px]"><span>#${i.id}</span><span class="text-zinc-300 uppercase">${i.category}</span><span class="font-bold">${i.amount}</span></div>`; });
             printToConsole(table + '</div>');
         }
-        else if (cmd === 'CLEAR') { output.innerHTML = '<div class="scanline"></div>'; }
+        else if (cmd === 'CLEAR') { output.innerHTML = '<div class="scanline"></div>'; chartContainer.classList.add('hidden'); }
         else if (commands[cmd]) { printToConsole(`> ${commands[cmd]}`); }
         else { printToConsole(`> ERR: UNKNOWN '${cmd}'`, 'text-yellow-700'); }
     }
