@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORACLE DATA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,16 +12,31 @@
     <div id="splash" class="fixed inset-0 z-[100] flex items-center justify-center bg-inherit transition-opacity duration-700">
         <div class="text-6xl font-black italic text-[#F80000]">O</div>
     </div>
+
     <header class="h-14 border-b border-[#3A3530] flex items-center px-4 gap-4">
         <div class="oracle-logo">ORACLE</div>
     </header>
+
     <main class="flex-1 p-4 flex flex-col overflow-hidden">
-        <div id="terminal-out" class="flex-1 p-4 mono text-[13px]"><div class="scanline"></div></div>
+        <div id="terminal-out" class="flex-1 p-4 mono text-[13px]">
+            <div class="scanline"></div>
+        </div>
         <div class="h-12 border border-[#3A3530] flex items-center px-4 mt-2 border-t-2 border-red-600">
-            <span class="text-red-600 mr-2">></span><input type="text" id="cmd-input" autofocus>
+            <span class="text-red-600 mr-2">></span>
+            <input type="text" id="cmd-input" autofocus autocomplete="off">
         </div>
     </main>
-    <script src="app.js"></script>
-    <script>window.onload = () => setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(() => document.getElementById('splash').style.display = 'none', 700); }, 1000);</script>
+
+    <script src="app_v2.js"></script>
+    
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 700);
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
