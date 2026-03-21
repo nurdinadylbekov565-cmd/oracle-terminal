@@ -17,11 +17,15 @@
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="h-screen flex flex-col overflow-hidden bg-[#0c0c0c]">
+<body class="h-screen flex flex-col overflow-hidden bg-black">
     
-    <header class="h-14 bg-[#1a1918] border-b border-[#3A3530] flex items-center justify-between px-4 md:px-8 z-50">
+    <header class="h-14 bg-[#111] border-b-2 border-[#F80000] flex items-center justify-between px-4 md:px-8 z-50">
         <div class="flex items-center gap-4 md:gap-6">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="Logo" class="h-4 md:h-5 brightness-200">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" 
+                 alt="ORACLE" 
+                 style="filter: invert(12%) sepia(94%) saturate(7465%) hue-rotate(358deg) brightness(96%) contrast(118%);" 
+                 class="h-5">
+            
             <div class="h-6 w-[1px] bg-[#3A3530]"></div>
             <h1 class="text-[#EBEAE8] text-[10px] md:text-[12px] tracking-[0.3em] font-light uppercase opacity-60">Data Control System</h1>
         </div>
@@ -34,33 +38,33 @@
     </header>
 
     <main class="flex-1 flex overflow-hidden relative">
-        <aside class="hidden lg:flex w-64 border-r border-[#3A3530] flex-col p-6 gap-8 bg-[#0c0c0c] z-40">
+        <aside class="hidden lg:flex w-64 border-r border-[#F80000] flex-col p-6 gap-8 bg-[#050505] z-40">
             <div class="space-y-6">
-                <div class="italic">MAIN_OPERATIONS</div>
+                <div class="italic text-[#F80000] font-bold">MAIN_OPERATIONS</div>
                 <nav class="space-y-2">
-                    <div class="group"><span>▶</span> SCAN</div>
-                    <div class="group"><span>▶</span> STATUS</div>
-                    <div class="group"><span>▶</span> DATABASES</div>
+                    <div class="group cursor-pointer hover:text-white transition-all"><span>▶</span> SCAN</div>
+                    <div class="group cursor-pointer hover:text-white transition-all"><span>▶</span> STATUS</div>
+                    <div class="group cursor-pointer hover:text-white transition-all"><span>▶</span> DATABASES</div>
                 </nav>
             </div>
             <div class="space-y-6">
-                <div class="italic">ANALYTICS</div>
+                <div class="italic text-[#F80000] font-bold">ANALYTICS</div>
                 <nav class="space-y-2">
-                    <div class="group"><span>▶</span> SHOW</div>
-                    <div class="group"><span>▶</span> STATS</div>
-                    <div class="group"><span>▶</span> TOTAL</div>
+                    <div class="group cursor-pointer hover:text-white transition-all"><span>▶</span> SHOW</div>
+                    <div class="group cursor-pointer hover:text-white transition-all"><span>▶</span> STATS</div>
+                    <div class="group cursor-pointer hover:text-white transition-all"><span>▶</span> TOTAL</div>
                 </nav>
             </div>
         </aside>
 
-        <section class="flex-1 flex flex-col p-4 md:p-8 relative min-w-0">
+        <section class="flex-1 flex flex-col p-4 md:p-8 relative min-w-0 bg-black">
             <div class="lg:hidden flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
-                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Scan</button>
-                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Stats</button>
-                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Clear</button>
+                <button class="bg-[#111] border border-[#F80000] text-zinc-400 px-3 py-2 text-[10px] uppercase hover:text-white">Scan</button>
+                <button class="bg-[#111] border border-[#F80000] text-zinc-400 px-3 py-2 text-[10px] uppercase hover:text-white">Stats</button>
+                <button class="bg-[#111] border border-[#F80000] text-zinc-400 px-3 py-2 text-[10px] uppercase hover:text-white">Clear</button>
             </div>
 
-            <div id="terminal-out" class="flex-1 bg-black border border-[#3A3530] p-4 md:p-6 mono text-[12px] md:text-[13px] text-white overflow-y-auto relative shadow-inner">
+            <div id="terminal-out" class="flex-1 bg-black border border-[#F80000] p-4 md:p-6 mono text-[12px] md:text-[13px] text-white overflow-y-auto relative shadow-[0_0_15px_rgba(248,0,0,0.1)]">
                 <div class="scanline"></div>
                 <p class="text-zinc-600 mb-4 tracking-widest text-[9px] md:text-[10px]">>>> INITIALIZING ORACLE_CORE...</p>
                 
@@ -72,9 +76,9 @@
                 <p class="text-zinc-400">> СИСТЕМА ГОТОВА К РАБОТЕ.</p>
             </div>
             
-            <div class="h-14 bg-black border border-[#3A3530] flex items-center px-4 md:px-6 gap-3 md:gap-4 border-t-2 border-red-600 shadow-lg mt-4">
+            <div class="h-14 bg-black border-2 border-[#F80000] flex items-center px-4 md:px-6 gap-3 md:gap-4 shadow-[0_0_20px_rgba(248,0,0,0.15)] mt-4">
                 <span class="text-red-600 font-bold text-lg animate-pulse">></span>
-                <input type="text" id="cmd-input" placeholder="WAITING_FOR_COMMAND..." class="flex-1 bg-transparent border-none outline-none text-white font-mono text-sm md:text-base placeholder-zinc-800" autofocus autocomplete="off">
+                <input type="text" id="cmd-input" placeholder="WAITING_FOR_COMMAND..." class="flex-1 bg-transparent border-none outline-none text-white font-mono text-sm md:text-base placeholder-zinc-900 uppercase" autofocus autocomplete="off">
             </div>
         </section>
     </main>

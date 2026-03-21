@@ -2,68 +2,66 @@
 
 :root {
     --oracle-red: #F80000;
-    --oracle-bg: #0c0c0c;
-    --oracle-border: #3A3530;
+    --oracle-bg: #000000;
+    --oracle-white: #FFFFFF;
+    --oracle-border: #222222;
 }
 
 body {
     background-color: var(--oracle-bg);
-    color: #EBEAE8;
+    color: var(--oracle-white);
     font-family: 'JetBrains Mono', monospace;
     margin: 0;
     background-image: radial-gradient(var(--oracle-border) 0.5px, transparent 0.5px);
-    background-size: 30px 30px;
+    background-size: 20px 20px;
+}
+
+/* Хедер в стиле Oracle */
+header {
+    background-color: #111111 !important;
+    border-bottom: 2px solid var(--oracle-red) !important;
+}
+
+/* Боковое меню */
+aside {
+    background-color: #050505 !important;
+    border-right: 1px solid var(--oracle-red) !important;
 }
 
 aside div.italic {
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.3em;
-    color: #504a44;
-    font-size: 10px;
+    color: var(--oracle-red) !important;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 nav div {
-    padding: 10px 14px;
-    border-radius: 4px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-left: 2px solid transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
+    color: #888;
+    border-left: 3px solid transparent;
 }
 
 nav div:hover {
-    background: rgba(248, 0, 0, 0.07);
-    color: white;
-    border-left: 2px solid var(--oracle-red);
-    padding-left: 22px;
+    background: rgba(248, 0, 0, 0.1);
+    color: var(--oracle-white);
+    border-left: 3px solid var(--oracle-red);
 }
 
-nav div span {
-    color: #444;
-    margin-right: 8px;
-    transition: color 0.3s;
+/* Терминал */
+#terminal-out {
+    background-color: #000000 !important;
+    border: 1px solid var(--oracle-red) !important;
+    box-shadow: inset 0 0 20px rgba(248, 0, 0, 0.05);
 }
 
-nav div:hover span {
-    color: var(--oracle-red);
+/* Полоса ввода */
+.h-14.bg-black {
+    border: 2px solid var(--oracle-red) !important;
+    background-color: #000000 !important;
 }
-
-.scanline {
-    width: 100%; height: 2px; 
-    background: linear-gradient(to bottom, transparent, rgba(248, 0, 0, 0.15), transparent);
-    position: absolute; left: 0; top: 0;
-    animation: scan 8s linear infinite;
-    pointer-events: none;
-    z-index: 10;
-}
-
-@keyframes scan { from { top: 0; } to { top: 100%; } }
 
 #cmd-input {
-    caret-color: var(--oracle-red);
+    color: var(--oracle-white) !important;
+    text-transform: uppercase;
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
+/* Скроллбар */
+::-webkit-scrollbar-thumb { background: var(--oracle-red); }
