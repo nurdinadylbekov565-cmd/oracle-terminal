@@ -2,66 +2,41 @@
 
 :root {
     --oracle-red: #F80000;
-    --oracle-bg: #000000;
-    --oracle-white: #FFFFFF;
-    --oracle-border: #222222;
+    --ilom-blue: #314358;
+    --ilom-sidebar: #4a5a6a;
+    --ilom-bg: #f0f0f0;
 }
 
 body {
-    background-color: var(--oracle-bg);
-    color: var(--oracle-white);
+    background-color: var(--ilom-bg);
+    color: #333;
     font-family: 'JetBrains Mono', monospace;
     margin: 0;
-    background-image: radial-gradient(var(--oracle-border) 0.5px, transparent 0.5px);
-    background-size: 20px 20px;
 }
 
-/* Хедер в стиле Oracle */
 header {
-    background-color: #111111 !important;
-    border-bottom: 2px solid var(--oracle-red) !important;
+    background-color: var(--ilom-blue) !important;
+    border-bottom: 1px solid #243242 !important;
 }
 
-/* Боковое меню */
 aside {
-    background-color: #050505 !important;
-    border-right: 1px solid var(--oracle-red) !important;
-}
-
-aside div.italic {
-    color: var(--oracle-red) !important;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-nav div {
-    color: #888;
-    border-left: 3px solid transparent;
+    background-color: var(--ilom-sidebar) !important;
+    border-right: 1px solid #3a4a5a !important;
 }
 
 nav div:hover {
-    background: rgba(248, 0, 0, 0.1);
-    color: var(--oracle-white);
-    border-left: 3px solid var(--oracle-red);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
-/* Терминал */
 #terminal-out {
-    background-color: #000000 !important;
-    border: 1px solid var(--oracle-red) !important;
-    box-shadow: inset 0 0 20px rgba(248, 0, 0, 0.05);
-}
-
-/* Полоса ввода */
-.h-14.bg-black {
-    border: 2px solid var(--oracle-red) !important;
-    background-color: #000000 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #ccc !important;
 }
 
 #cmd-input {
-    color: var(--oracle-white) !important;
     text-transform: uppercase;
 }
 
-/* Скроллбар */
-::-webkit-scrollbar-thumb { background: var(--oracle-red); }
+::-webkit-scrollbar-thumb { background: #bbb; }
+::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
