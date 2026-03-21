@@ -3,37 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORACLE DATA</title>
+    <title>ORACLE TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
+        :root { --oracle-red: #F80000; --oracle-bg: #0c0c0c; --oracle-border: #3A3530; }
+        body { 
+            background-color: var(--oracle-bg); color: #EBEAE8; 
+            font-family: 'JetBrains Mono', monospace; margin: 0;
+            background-image: radial-gradient(var(--oracle-border) 0.5px, transparent 0.5px);
+            background-size: 30px 30px; overflow: hidden; height: 100vh;
+        }
+        .oracle-logo { background: var(--oracle-red); color: white; font-weight: 900; font-style: italic; padding: 2px 8px; font-size: 14px; width: fit-content; }
+        #terminal-out { 
+            background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+            background-size: 100% 4px; overflow-y: auto; position: relative;
+        }
+        .scanline {
+            width: 100%; height: 2px; position: absolute; left: 0; top: 0;
+            background: linear-gradient(to bottom, transparent, rgba(248, 0, 0, 0.15), transparent);
+            animation: scan 8s linear infinite; pointer-events: none; z-index: 10;
+        }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+        #cmd-input { background: transparent; border: none; color: white; outline: none; width: 100%; font-family: 'JetBrains Mono', monospace; caret-color: var(--oracle-red); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
+    </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="flex flex-col">
     <div id="splash" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#0c0c0c] transition-opacity duration-700">
         <div class="text-6xl font-black italic text-[#F80000]">O</div>
     </div>
-    <header class="h-14 border-b border-[#3A3530] flex items-center px-4 gap-4">
+    <header class="h-14 border-b border-[#3A3530] flex items-center px-4">
         <div class="oracle-logo">ORACLE</div>
     </header>
     <main class="flex-1 p-4 flex flex-col overflow-hidden">
-        <div id="terminal-out" class="flex-1 p-4 mono text-[13px]">
+        <div id="terminal-out" class="flex-1 p-4 mono text-[13px] border border-[#3A3530] relative">
             <div class="scanline"></div>
         </div>
-        <div class="h-12 border border-[#3A3530] flex items-center px-4 mt-2 border-t-2 border-red-600">
-            <span class="text-red-600 mr-2">></span>
-            <input type="text" id="cmd-input" autofocus autocomplete="off">
+        <div class="h-12 border border-[#3A3530] flex items-center px-4 mt-2 border-t-2 border-red-600 bg-black">
+            <span class="text-red-600 mr-2 font-bold">></span>
+            <input type="text" id="cmd-input" autofocus autocomplete="off" placeholder="READY_FOR_COMMAND...">
         </div>
     </main>
-    <script src="app.js"></script>
+
     <script>
-        window.addEventListener('load', () => {
+        window.onload = async function () {
+            // ТВОИ КЛЮЧИ И ПОДКЛЮЧЕНИЕ
+            const SUPABASE_URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
+            const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            const input = document.getElementById('cmd-input');
+            const output = document.getElementById('terminal-out');
+            let virtualDB = [];
+
+            // ФУНКЦИЯ ПЕЧАТИ
+            function printToConsole(text, colorClass = 'text-zinc-400') {
+                const line = document.createElement('div');
+                line.className = `${colorClass} mb-2 pl-4 border-l border-zinc-800`;
+                line.innerHTML = text;
+                output.appendChild(line);
+                output.scrollTop = output.scrollHeight;
+            }
+
+            // СИНХРОНИЗАЦИЯ
+            async function syncData() {
+                printToConsole('> SYNCING WITH CLOUD_DB...', 'text-zinc-500 italic');
+                const { data, error } = await _supabase.from('oracle_expenses').select('*');
+                if (!error && data) {
+                    virtualDB = data;
+                    printToConsole(`> SYNC_COMPLETE: ${virtualDB.length} RECORDS LOADED.`, 'text-green-600');
+                } else {
+                    printToConsole('> SYNC_ERROR: OFFLINE_MODE.', 'text-red-600');
+                }
+            }
+
+            // КОМАНДЫ
+            async function processCommand(rawCmd) {
+                const fullCmd = rawCmd.trim();
+                if (!fullCmd) return;
+                const parts = fullCmd.split(' ');
+                const cmd = parts[0].toUpperCase();
+
+                printToConsole(`<span class="text-[#F80000] font-bold">SYS@ORACLE:~$</span> <span class="text-white">${fullCmd}</span>`);
+
+                if (cmd === 'HELP') {
+                    printToConsole('AVAILABLE: SCAN, STATUS, ADD [AMT] [DESC], DELETE [ID], TOTAL, CLEAR');
+                } else if (cmd === 'ADD') {
+                    const amount = parseFloat(parts[1]);
+                    const desc = parts.slice(2).join(' ') || 'OTHER';
+                    const { data, error } = await _supabase.from('oracle_expenses').insert([{ amount, category: desc.toUpperCase() }]).select();
+                    if (!error) {
+                        virtualDB.push(data[0]);
+                        printToConsole(`> SUCCESS: DATA_COMMITTED [ID: ${data[0].id}]`, 'text-green-500');
+                    }
+                } else if (cmd === 'CLEAR') {
+                    output.innerHTML = '<div class="scanline"></div>';
+                } else if (cmd === 'STATUS') {
+                    printToConsole('SYSTEM: OPERATIONAL | CLOUD: CONNECTED', 'text-cyan-500');
+                } else {
+                    printToConsole(`> ERR: UNKNOWN_COMMAND '${cmd}'`, 'text-yellow-700');
+                }
+            }
+
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { processCommand(input.value); input.value = ''; } });
+            
+            // SPLASH SCREEN
             setTimeout(() => {
                 const s = document.getElementById('splash');
                 s.style.opacity = '0';
                 setTimeout(() => s.style.display = 'none', 700);
             }, 800);
-        });
+
+            await syncData();
+        };
     </script>
 </body>
 </html>

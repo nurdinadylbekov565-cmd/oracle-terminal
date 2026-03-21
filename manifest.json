@@ -3,13 +3,13 @@
   "short_name": "ORACLE",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0c0c0c",
+  "background_color": "#000000",
   "theme_color": "#F80000",
   "icons": [
     {
-      "src": "image_99d367.png",
+      "src": "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ]
 }

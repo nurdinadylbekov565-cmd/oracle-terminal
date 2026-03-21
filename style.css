@@ -1,12 +1,76 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
-:root { --oracle-red: #F80000; --bg: #0c0c0c; --text: #EBEAE8; --border: #3A3530; }
-body.theme-rb26 { --bg: #000B14; --border: #0033A0; --text: #ffffff; }
-body {
-    background-color: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace;
-    background-image: radial-gradient(var(--border) 0.5px, transparent 0.5px); background-size: 30px 30px;
-    transition: all 0.3s ease; margin: 0;
+
+:root {
+    --oracle-red: #F80000;
+    --oracle-bg: #0c0c0c;
+    --oracle-border: #3A3530;
 }
-#terminal-out { background: rgba(0,0,0,0.5); border: 1px solid var(--border); height: 80vh; overflow-y: auto; position: relative; }
-.scanline { position: absolute; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; pointer-events: none; }
-.oracle-logo { background: var(--oracle-red); color: white; font-weight: 900; font-style: italic; padding: 2px 8px; text-transform: uppercase; }
-input { background: transparent; border: none; color: white; outline: none; width: 100%; font-weight: bold; font-family: 'JetBrains Mono', monospace; }
+
+body {
+    background-color: var(--oracle-bg);
+    color: #EBEAE8;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    /* Твоя легендарная сетка */
+    background-image: radial-gradient(var(--oracle-border) 0.5px, transparent 0.5px);
+    background-size: 30px 30px;
+}
+
+/* ШРИФТ ДЛЯ ЗАГОЛОВКА МЕНЮ */
+aside div.italic {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3em;
+    color: #504a44;
+    font-size: 10px;
+}
+
+/* ИНТЕРАКТИВНЫЕ ПУНКТЫ МЕНЮ */
+nav div {
+    padding: 10px 14px;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Плавная «гидравлика» */
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+nav div:hover {
+    background: rgba(248, 0, 0, 0.07); /* Легкое свечение фона */
+    color: white;
+    border-left: 2px solid var(--oracle-red);
+    padding-left: 22px; /* Эффект смещения (раскрытия) */
+}
+
+/* СТРЕЛОЧКА В МЕНЮ */
+nav div span {
+    color: #444;
+    margin-right: 8px;
+    transition: color 0.3s;
+}
+
+nav div:hover span {
+    color: var(--oracle-red);
+}
+
+/* ЭФФЕКТ СКАНИРУЮЩЕЙ ЛИНИИ */
+.scanline {
+    width: 100%; height: 2px; 
+    background: linear-gradient(to bottom, transparent, rgba(248, 0, 0, 0.15), transparent);
+    position: absolute; left: 0; top: 0;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes scan { from { top: 0; } to { top: 100%; } }
+
+/* КУРСОР ВВОДА */
+#cmd-input {
+    caret-color: var(--oracle-red);
+}
+
+/* ПОЛОСА ПРОКРУТКИ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
