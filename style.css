@@ -7,11 +7,24 @@
     --ilom-bg: #f0f0f0;
 }
 
+/* ФИКС ВЫСОТЫ ДЛЯ ТЕЛЕФОНОВ */
+html, body {
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
+    position: fixed; /* Запрет скролла всей страницы */
+    width: 100%;
+}
+
 body {
     background-color: var(--ilom-bg);
     color: #333;
     font-family: 'JetBrains Mono', monospace;
     margin: 0;
+}
+
+main {
+    height: calc(100svh - 3.5rem); /* Динамическая высота за вычетом хедера */
 }
 
 header {
@@ -40,3 +53,9 @@ nav div:hover {
 
 ::-webkit-scrollbar-thumb { background: #bbb; }
 ::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
+
+/* Адаптив для мелких экранов */
+@media (max-width: 768px) {
+    section { padding: 0.75rem !important; }
+    #terminal-out { font-size: 11px !important; }
+}
