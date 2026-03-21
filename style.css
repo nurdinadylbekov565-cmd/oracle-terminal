@@ -7,34 +7,40 @@
     --ilom-bg: #f0f0f0;
 }
 
-/* ФИКС ВЫСОТЫ ДЛЯ ТЕЛЕФОНОВ */
+/* ФИКС ВЫСОТЫ И СКРОЛЛА */
 html, body {
-    height: 100%;
-    height: -webkit-fill-available;
+    height: 100vh;
+    height: 100svh;
     overflow: hidden;
-    position: fixed; /* Запрет скролла всей страницы */
-    width: 100%;
+    margin: 0;
+    background-color: var(--ilom-bg);
 }
 
 body {
-    background-color: var(--ilom-bg);
+    display: flex;
+    flex-direction: column;
     color: #333;
     font-family: 'JetBrains Mono', monospace;
-    margin: 0;
-}
-
-main {
-    height: calc(100svh - 3.5rem); /* Динамическая высота за вычетом хедера */
 }
 
 header {
     background-color: var(--ilom-blue) !important;
     border-bottom: 1px solid #243242 !important;
+    flex-shrink: 0;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    height: calc(100svh - 3.5rem);
 }
 
 aside {
     background-color: var(--ilom-sidebar) !important;
     border-right: 1px solid #3a4a5a !important;
+    width: 256px;
+    flex-shrink: 0;
 }
 
 nav div:hover {
@@ -42,9 +48,11 @@ nav div:hover {
     color: white;
 }
 
+/* ТЕРМИНАЛ */
 #terminal-out {
     background-color: #ffffff !important;
     border: 1px solid #ccc !important;
+    flex: 1;
 }
 
 #cmd-input {
@@ -54,8 +62,19 @@ nav div:hover {
 ::-webkit-scrollbar-thumb { background: #bbb; }
 ::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
 
-/* Адаптив для мелких экранов */
+/* Адаптив для мобилок — ПРИЖИМАЕМ ИНПУТ */
 @media (max-width: 768px) {
-    section { padding: 0.75rem !important; }
+    section { 
+        padding: 10px !important; 
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
     #terminal-out { font-size: 11px !important; }
+    
+    /* Убираем отступы вокруг инпута на мобилках для экономии места */
+    .h-14.bg-\[\#e8e8e8\] {
+        margin-top: 8px;
+        flex-shrink: 0;
+    }
 }
