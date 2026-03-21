@@ -2,133 +2,83 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORACLE | DATA TERMINAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ORACLE DATA CONTROL</title>
+    
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
-        :root { --red: #F80000; --bg: #070707; --border: #1a1a1a; }
-        body { 
-            background: var(--bg); color: #ebeae8; font-family: 'JetBrains Mono', monospace; 
-            background-image: radial-gradient(#151515 1px, transparent 1px); background-size: 20px 20px;
-            margin: 0; height: 100vh; overflow: hidden;
-        }
-        .oracle-text { font-size: 24px; font-weight: 900; color: var(--red); letter-spacing: -1px; }
-        .sidebar-item:hover { color: white; border-left: 2px solid var(--red); padding-left: 1rem; background: rgba(248,0,0,0.05); }
-        #terminal-out { scrollbar-width: none; }
-        #terminal-out::-webkit-scrollbar { display: none; }
-        .scanline {
-            width: 100%; height: 2px; position: absolute; background: linear-gradient(to bottom, transparent, rgba(248, 0, 0, 0.08), transparent);
-            animation: scan 10s linear infinite; pointer-events: none;
-        }
-        @keyframes scan { from { top: 0; } to { top: 100%; } }
-        input { background: transparent; border: none; outline: none; width: 100%; color: white; caret-color: var(--red); }
-    </style>
+    
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="flex flex-col border-t-2 border-[#F80000]">
-    <header class="h-14 border-b border-[#1a1a1a] flex items-center px-6 justify-between bg-black/90">
-        <div class="flex items-center gap-4">
-            <div class="oracle-text">ORACLE</div>
-            <div class="h-4 w-[1px] bg-zinc-800"></div>
-            <div class="text-[10px] text-zinc-500 tracking-[0.3em]">DATA TERMINAL</div>
+<body class="h-screen flex flex-col overflow-hidden bg-[#0c0c0c]">
+    
+    <header class="h-14 bg-[#1a1918] border-b border-[#3A3530] flex items-center justify-between px-4 md:px-8 z-50">
+        <div class="flex items-center gap-4 md:gap-6">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="Logo" class="h-4 md:h-5 brightness-200">
+            <div class="h-6 w-[1px] bg-[#3A3530]"></div>
+            <h1 class="text-[#EBEAE8] text-[10px] md:text-[12px] tracking-[0.3em] font-light uppercase opacity-60">Data Control System</h1>
         </div>
-        <div class="text-[10px] text-zinc-500 font-bold uppercase italic">System_Active // Toni_Stark</div>
+        <div class="hidden md:flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span class="text-[9px] text-zinc-500 uppercase tracking-widest">Operator</span>
+                <span class="text-[11px] text-[#F80000] font-bold">TONI_STARK</span>
+            </div>
+        </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
-        <aside class="w-56 border-r border-[#1a1a1a] p-6 flex flex-col gap-8 bg-black/20">
-            <div>
-                <div class="text-[9px] text-zinc-600 mb-6 tracking-widest italic uppercase">Main_Menu</div>
-                <nav class="flex flex-col gap-4 text-[11px] text-zinc-500">
-                    <div class="sidebar-item cursor-pointer transition-all flex items-center gap-2" onclick="processCommand('DATABASES')"><span>▶</span> DATABASES</div>
-                    <div class="sidebar-item cursor-pointer transition-all flex items-center gap-2" onclick="processCommand('SECURITY')"><span>▶</span> SECURITY</div>
-                    <div class="sidebar-item cursor-pointer transition-all flex items-center gap-2" onclick="processCommand('LOGS')"><span>▶</span> LOGS</div>
-                    <div class="sidebar-item cursor-pointer transition-all flex items-center gap-2" onclick="processCommand('STATS')"><span>▶</span> STATS</div>
+    <main class="flex-1 flex overflow-hidden relative">
+        <aside class="hidden lg:flex w-64 border-r border-[#3A3530] flex-col p-6 gap-8 bg-[#0c0c0c] z-40">
+            <div class="space-y-6">
+                <div class="italic">MAIN_OPERATIONS</div>
+                <nav class="space-y-2">
+                    <div class="group"><span>▶</span> SCAN</div>
+                    <div class="group"><span>▶</span> STATUS</div>
+                    <div class="group"><span>▶</span> DATABASES</div>
+                </nav>
+            </div>
+            <div class="space-y-6">
+                <div class="italic">ANALYTICS</div>
+                <nav class="space-y-2">
+                    <div class="group"><span>▶</span> SHOW</div>
+                    <div class="group"><span>▶</span> STATS</div>
+                    <div class="group"><span>▶</span> TOTAL</div>
                 </nav>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col p-8 relative">
-            <div class="scanline"></div>
-            <div id="terminal-out" class="flex-1 p-6 text-[13px] border border-[#1a1a1a] overflow-y-auto bg-black/40">
-                <div class="text-zinc-600 italic mb-2">>>> INITIALIZING ORACLE_CORE...</div>
+        <section class="flex-1 flex flex-col p-4 md:p-8 relative min-w-0">
+            <div class="lg:hidden flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Scan</button>
+                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Stats</button>
+                <button class="bg-[#1a1918] border border-[#3A3530] text-zinc-500 px-3 py-2 text-[10px] uppercase">Clear</button>
+            </div>
+
+            <div id="terminal-out" class="flex-1 bg-black border border-[#3A3530] p-4 md:p-6 mono text-[12px] md:text-[13px] text-white overflow-y-auto relative shadow-inner">
+                <div class="scanline"></div>
+                <p class="text-zinc-600 mb-4 tracking-widest text-[9px] md:text-[10px]">>>> INITIALIZING ORACLE_CORE...</p>
+                
+                <div id="chart-container" class="mb-6 bg-[#0a0a0a] border border-zinc-900 p-2 hidden">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+
+                <p class="text-red-600 font-bold">> AUTHENTICATION SUCCESSFUL.</p>
+                <p class="text-zinc-400">> СИСТЕМА ГОТОВА К РАБОТЕ.</p>
             </div>
             
-            <div id="chart-container" class="hidden h-64 border border-[#1a1a1a] my-4 bg-black/80 p-4">
-                <canvas id="expensesChart"></canvas>
+            <div class="h-14 bg-black border border-[#3A3530] flex items-center px-4 md:px-6 gap-3 md:gap-4 border-t-2 border-red-600 shadow-lg mt-4">
+                <span class="text-red-600 font-bold text-lg animate-pulse">></span>
+                <input type="text" id="cmd-input" placeholder="WAITING_FOR_COMMAND..." class="flex-1 bg-transparent border-none outline-none text-white font-mono text-sm md:text-base placeholder-zinc-800" autofocus autocomplete="off">
             </div>
+        </section>
+    </main>
 
-            <div class="h-14 border border-[#F80000] bg-black flex items-center px-6 mt-6">
-                <span class="text-[#F80000] mr-4 font-black">SYS:~$</span>
-                <input type="text" id="cmd-input" placeholder="ENTER_COMMAND..." autofocus autocomplete="off">
-            </div>
-        </main>
-    </div>
-
-    <script>
-        const SUPABASE_URL = 'https://iivlxixcmlrqwdhewbuz.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_H_obrhzr2n6zhfq-sQUKKw_Adp37KL7';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        const input = document.getElementById('cmd-input');
-        const output = document.getElementById('terminal-out');
-        const chartContainer = document.getElementById('chart-container');
-        let virtualDB = [];
-        let myChart = null;
-
-        function printToConsole(text, colorClass = 'text-zinc-400') {
-            const line = document.createElement('div');
-            line.className = `${colorClass} mb-2 flex gap-2`;
-            line.innerHTML = `<span>></span> <span>${text}</span>`;
-            output.appendChild(line);
-            output.scrollTop = output.scrollHeight;
-        }
-
-        async function syncData() {
-            printToConsole('SYNCING WITH CLOUD_DB...', 'text-zinc-600 italic');
-            const { data, error } = await _supabase.from('oracle_expenses').select('*');
-            if (!error && data) {
-                virtualDB = data;
-                printToConsole(`SYNC_COMPLETE: ${virtualDB.length} RECORDS LOADED.`, 'text-green-600 font-bold');
-            }
-        }
-
-        async function processCommand(raw) {
-            const full = raw.trim(); if(!full) return;
-            const parts = full.split(' '); const cmd = parts[0].toUpperCase();
-            
-            printToConsole(`<span class="text-[#F80000] font-bold">AUTHENTICATION SUCCESSFUL.</span>`, 'block');
-            printToConsole(`СИСТЕМА ГОТОВА К РАБОТЕ.`, 'text-zinc-200');
-
-            if (cmd === 'STATS') {
-                chartContainer.classList.remove('hidden');
-                if (myChart) myChart.destroy();
-                const summary = {};
-                virtualDB.forEach(i => { const c = i.category || 'OTHER'; summary[c] = (summary[c] || 0) + (parseFloat(i.amount) || 0); });
-                const ctx = document.getElementById('expensesChart').getContext('2d');
-                myChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(summary),
-                        datasets: [{ data: Object.values(summary), backgroundColor: ['#F80000', '#22c55e', '#3b82f6', '#eab308'] }]
-                    },
-                    options: { maintainAspectRatio: false, plugins: { legend: { labels: { color: '#555', font: { size: 10 } } } } }
-                });
-            } else if (cmd === 'CLEAR') {
-                output.innerHTML = ''; chartContainer.classList.add('hidden');
-            } else if (cmd === 'DATABASES') {
-                printToConsole('CONNECTED TO: oracle_expenses [SUPABASE_CLOUD]', 'text-cyan-600');
-            } else if (cmd === 'SECURITY') {
-                printToConsole('FIREWALL: ACTIVE | ENCRYPTION: AES-256', 'text-green-600');
-            } else if (cmd === 'LOGS') {
-                printToConsole('SESSION_START: ' + new Date().toLocaleString(), 'text-zinc-500');
-            }
-        }
-
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { processCommand(input.value); input.value = ''; } });
-        window.onload = syncData;
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
