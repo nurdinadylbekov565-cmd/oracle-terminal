@@ -1,15 +1,17 @@
 {
-  "name": "ORACLE TERMINAL",
+  "name": "ORACLE DATA CONTROL",
   "short_name": "ORACLE",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#F80000",
+  "orientation": "portrait",
+  "background_color": "#f0f0f0",
+  "theme_color": "#314358",
   "icons": [
     {
       "src": "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
