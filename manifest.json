@@ -1,25 +1,23 @@
 {
+  "id": "oracle-data-control-v1",
   "name": "ORACLE DATA CONTROL",
   "short_name": "ORACLE",
-  "start_url": "./index.html",
+  "start_url": "./index.html?launcher=true",
   "display": "standalone",
-  "display_override": ["window-controls-overlay"],
-  "orientation": "portrait",
   "background_color": "#f0f0f0",
   "theme_color": "#314358",
-  "description": "Oracle Enterprise Data Management Terminal",
   "icons": [
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg",
-      "sizes": "192x192",
+      "src": "icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 144x144 192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

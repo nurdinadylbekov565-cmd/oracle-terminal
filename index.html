@@ -19,7 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="overflow-hidden"> 
+<body class="overflow-hidden bg-[#f0f0f0]"> 
     <header class="h-14 bg-[#314358] border-b border-[#243242] flex items-center justify-between px-4 md:px-8 z-50">
         <div class="flex items-center gap-4 md:gap-6">
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" 
@@ -37,8 +37,8 @@
         </div>
     </header>
 
-    <main class="relative">
-        <aside class="hidden lg:flex flex-col p-6 gap-8 z-40">
+    <main class="relative flex flex-row h-[calc(100vh-3.5rem)]">
+        <aside class="hidden lg:flex flex-col w-64 p-6 gap-8 z-40 bg-[#4a5a6a] border-r border-[#ccc]">
             <div class="space-y-6">
                 <div class="italic text-white/40 font-bold uppercase text-[10px] tracking-widest">Main Operations</div>
                 <nav class="space-y-2 text-white/80">
@@ -49,8 +49,8 @@
             </div>
         </aside>
 
-        <section class="flex-1 min-w-0">
-            <div id="terminal-out" class="p-4 md:p-6 mono text-[12px] md:text-[13px] text-[#333] overflow-y-auto relative">
+        <section class="flex-1 flex flex-col p-4 md:p-8 min-w-0">
+            <div id="terminal-out" class="flex-1 bg-white border border-[#ccc] p-4 md:p-6 mono text-[12px] md:text-[13px] text-[#333] overflow-y-auto relative shadow-sm">
                 <div class="scanline" style="background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.03), transparent); pointer-events: none;"></div>
                 <p class="text-zinc-400 mb-4 tracking-widest text-[9px] md:text-[10px]">>>> INITIALIZING ORACLE_CORE...</p>
                 <div id="chart-container" class="mb-6 bg-white border border-[#eee] p-2 hidden">
@@ -60,9 +60,9 @@
                 <p class="text-zinc-500">> СИСТЕМА ГОТОВА К РАБОТЕ.</p>
             </div>
             
-            <div class="h-14 bg-[#e8e8e8] border border-[#ccc] flex items-center px-4 md:px-6 gap-3 md:gap-4">
+            <div class="h-14 bg-[#e8e8e8] border border-[#ccc] flex items-center px-4 md:px-6 gap-3 md:gap-4 mt-4">
                 <span class="text-[#314358] font-bold text-lg">></span>
-                <input type="text" id="cmd-input" placeholder="WAITING_FOR_COMMAND..." class="flex-1 bg-white border border-[#bbb] px-4 py-2 outline-none text-[#333] font-mono text-sm uppercase" autofocus autocomplete="off">
+                <input type="text" id="cmd-input" placeholder="WAITING_FOR_COMMAND..." class="flex-1 bg-white border border-[#bbb] px-4 py-2 outline-none text-[#333] font-mono text-sm uppercase placeholder-zinc-400" autofocus autocomplete="off">
             </div>
         </section>
     </main>
