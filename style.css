@@ -7,13 +7,15 @@
     --ilom-bg: #f0f0f0;
 }
 
-/* ФИКС ВЫСОТЫ И СКРОЛЛА */
+/* КРИТИЧЕСКИЙ ФИКС ВЫСОТЫ ДЛЯ МОБИЛОК */
 html, body {
-    height: 100vh;
+    height: 100%;
     height: 100svh;
     overflow: hidden;
     margin: 0;
     background-color: var(--ilom-bg);
+    position: fixed; /* Запрещает системный скролл всей страницы */
+    width: 100%;
 }
 
 body {
@@ -27,6 +29,7 @@ header {
     background-color: var(--ilom-blue) !important;
     border-bottom: 1px solid #243242 !important;
     flex-shrink: 0;
+    height: 3.5rem;
 }
 
 main {
@@ -53,6 +56,8 @@ nav div:hover {
     background-color: #ffffff !important;
     border: 1px solid #ccc !important;
     flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #cmd-input {
@@ -62,19 +67,21 @@ nav div:hover {
 ::-webkit-scrollbar-thumb { background: #bbb; }
 ::-webkit-scrollbar-thumb:hover { background: var(--oracle-red); }
 
-/* Адаптив для мобилок — ПРИЖИМАЕМ ИНПУТ */
+/* Адаптив для мобилок */
 @media (max-width: 768px) {
     section { 
-        padding: 10px !important; 
+        padding: 8px !important; 
         height: 100%;
         display: flex;
         flex-direction: column;
+        flex: 1;
     }
     #terminal-out { font-size: 11px !important; }
     
-    /* Убираем отступы вокруг инпута на мобилках для экономии места */
+    /* Прижимаем контейнер инпута к низу */
     .h-14.bg-\[\#e8e8e8\] {
-        margin-top: 8px;
+        margin-top: auto;
         flex-shrink: 0;
+        margin-bottom: env(safe-area-inset-bottom);
     }
 }
